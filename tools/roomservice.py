@@ -34,7 +34,7 @@ except:
     device = product
 
 if not depsonly:
-    print "Device %s not found. Attempting to retrieve device repository from Collective-Phoenix Github (http://github.com/Collective-Phoenix)." % device
+    print "Device %s not found. Attempting to retrieve device repository from TheCollective Github (http://github.com/TheCollective)." % device
 
 repositories = []
 
@@ -50,7 +50,7 @@ except:
 
 page = 1
 while not depsonly:
-    githubreq = urllib2.Request("https://api.github.com/users/Collective-Phoenix/repos?per_page=100&page=%d" % page)
+    githubreq = urllib2.Request("https://api.github.com/users/TheCollective/repos?per_page=100&page=%d" % page)
     if githubauth:
         githubreq.add_header("Authorization","Basic %s" % githubauth)
     result = json.loads(urllib2.urlopen(githubreq).read())
@@ -59,6 +59,9 @@ while not depsonly:
     for res in result:
         repositories.append(res)
     page = page + 1
+
+local_manifests = r'.repo/local_manifests'
+if not os.path.exists(local_manifests): os.makedirs(local_manifests)
 
 def exists_in_tree(lm, repository):
     for child in lm.getchildren():
@@ -84,7 +87,7 @@ def indent(elem, level=0):
 
 def get_from_manifest(devicename):
     try:
-        lm = ElementTree.parse(".repo/local_manifest.xml")
+        lm = ElementTree.parse(".repo/local_manifests/aocp_manifest.xml")
         lm = lm.getroot()
     except:
         lm = ElementTree.Element("manifest")
@@ -108,7 +111,7 @@ def get_from_manifest(devicename):
 
 def is_in_manifest(projectname):
     try:
-        lm = ElementTree.parse(".repo/local_manifest.xml")
+        lm = ElementTree.parse(".repo/local_manifests/aocp_manifest.xml")
         lm = lm.getroot()
     except:
         lm = ElementTree.Element("manifest")
@@ -121,7 +124,7 @@ def is_in_manifest(projectname):
 
 def add_to_manifest(repositories):
     try:
-        lm = ElementTree.parse(".repo/local_manifest.xml")
+        lm = ElementTree.parse(".repo/local_manifests/aocp_manifest.xml")
         lm = lm.getroot()
     except:
         lm = ElementTree.Element("manifest")
@@ -130,12 +133,16 @@ def add_to_manifest(repositories):
         repo_name = repository['repository']
         repo_target = repository['target_path']
         if exists_in_tree(lm, repo_name):
-            print 'Collective-Phoenix/%s already exists' % (repo_name)
+            print '%s already exists' % (repo_name)
             continue
 
-        print 'Adding dependency: Collective-Phoenix/%s -> %s' % (repo_name, repo_target)
+        print 'Adding dependency: %s -> %s' % (repo_name, repo_target)
         project = ElementTree.Element("project", attrib = { "path": repo_target,
-            "revision": "jellybean2", "remote": "github", "name": "Collective-Phoenix/%s" % repo_name })
+            "revision": "kitkat", "remote": "github", "name": "TheCollective/%s" % repo_name })
+
+        if 'remote' in repository:
+            project.set('remote',repository['remote'])
+            project.set('name',repo_name)
 
         if 'branch' in repository:
             project.set('revision',repository['branch'])
@@ -146,7 +153,7 @@ def add_to_manifest(repositories):
     raw_xml = ElementTree.tostring(lm)
     raw_xml = '<?xml version="1.0" encoding="UTF-8"?>\n' + raw_xml
 
-    f = open('.repo/local_manifest.xml', 'w')
+    f = open('.repo/local_manifests/aocp_manifest.xml', 'w')
     f.write(raw_xml)
     f.close()
 
@@ -161,7 +168,7 @@ def fetch_dependencies(repo_path):
         fetch_list = []
 
         for dependency in dependencies:
-            if not is_in_manifest("Collective-Phoenix/%s" % dependency['repository']):
+            if not is_in_manifest("TheCollective/%s" % dependency['repository']):
                 fetch_list.append(dependency)
                 syncable_repos.append(dependency['target_path'])
 
@@ -205,4 +212,4 @@ else:
             print "Done"
             sys.exit()
 
-print "Repository for %s not found in the Collective-Phoenix Github repository list. If this is in error, you may need to manually add it to your local_manifest.xml." % device
+print "Repository for %s not found in the TheCollective Github repository list. If this is in error, you may need to manually add it to your local_manifest.xml." % device
