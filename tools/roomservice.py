@@ -34,7 +34,7 @@ except:
     device = product
 
 if not depsonly:
-    print "Device %s not found. Attempting to retrieve device repository from TheCollective Github (http://github.com/TheCollective)." % device
+    print "Device %s not found. Attempting to retrieve device repository from Collective-Phoenix Github (http://github.com/Collective-Phoenix)." % device
 
 repositories = []
 
@@ -50,7 +50,7 @@ except:
 
 page = 1
 while not depsonly:
-    githubreq = urllib2.Request("https://api.github.com/users/TheCollective/repos?per_page=100&page=%d" % page)
+    githubreq = urllib2.Request("https://api.github.com/users/Collective-Phoenix/repos?per_page=100&page=%d" % page)
     if githubauth:
         githubreq.add_header("Authorization","Basic %s" % githubauth)
     result = json.loads(urllib2.urlopen(githubreq).read())
@@ -130,12 +130,12 @@ def add_to_manifest(repositories):
         repo_name = repository['repository']
         repo_target = repository['target_path']
         if exists_in_tree(lm, repo_name):
-            print 'TheCollective/%s already exists' % (repo_name)
+            print 'Collective-Phoenix/%s already exists' % (repo_name)
             continue
 
-        print 'Adding dependency: TheCollective/%s -> %s' % (repo_name, repo_target)
+        print 'Adding dependency: Collective-Phoenix/%s -> %s' % (repo_name, repo_target)
         project = ElementTree.Element("project", attrib = { "path": repo_target,
-            "revision": "jellybean2", "remote": "github", "name": "TheCollective/%s" % repo_name })
+            "revision": "jellybean2", "remote": "github", "name": "Collective-Phoenix/%s" % repo_name })
 
         if 'branch' in repository:
             project.set('revision',repository['branch'])
@@ -161,7 +161,7 @@ def fetch_dependencies(repo_path):
         fetch_list = []
 
         for dependency in dependencies:
-            if not is_in_manifest("TheCollective/%s" % dependency['repository']):
+            if not is_in_manifest("Collective-Phoenix/%s" % dependency['repository']):
                 fetch_list.append(dependency)
                 syncable_repos.append(dependency['target_path'])
 
@@ -205,4 +205,4 @@ else:
             print "Done"
             sys.exit()
 
-print "Repository for %s not found in the TheCollective Github repository list. If this is in error, you may need to manually add it to your local_manifest.xml." % device
+print "Repository for %s not found in the Collective-Phoenix Github repository list. If this is in error, you may need to manually add it to your local_manifest.xml." % device

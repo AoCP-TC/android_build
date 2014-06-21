@@ -19,13 +19,13 @@ except:
     device = product
 
 if not depsonly:
-    print "Device %s not found. Attempting to retrieve device repository from TheCollective Github (http://github.com/TheCollective)." % device
+    print "Device %s not found. Attempting to retrieve device repository from Collective-Phoenix Github (http://github.com/Collective-Phoenix)." % device
 
 repositories = []
 
 page = 1
 while not depsonly:
-    result = json.loads(urllib2.urlopen("https://api.github.com/users/TheCollective/repos?page=%d" % page).read())
+    result = json.loads(urllib2.urlopen("https://api.github.com/users/Collective-Phoenix/repos?page=%d" % page).read())
     if len(result) == 0:
         break
     for res in result:
@@ -102,12 +102,12 @@ def add_to_manifest(repositories):
         repo_name = repository['repository']
         repo_target = repository['target_path']
         if exists_in_tree(lm, repo_name):
-            print 'TheCollective/%s already exists' % (repo_name)
+            print 'Collective-Phoenix/%s already exists' % (repo_name)
             continue
 
-        print 'Adding dependency: TheCollective/%s -> %s' % (repo_name, repo_target)
+        print 'Adding dependency: Collective-Phoenix/%s -> %s' % (repo_name, repo_target)
         project = ElementTree.Element("project", attrib = { "path": repo_target,
-            "remote": "github", "name": "TheCollective/%s" % repo_name, "revision": "jellybean" })
+            "remote": "github", "name": "Collective-Phoenix/%s" % repo_name, "revision": "jellybean" })
 
         if 'branch' in repository:
             project.set('revision',repository['branch'])
@@ -133,7 +133,7 @@ def fetch_dependencies(repo_path):
         fetch_list = []
 
         for dependency in dependencies:
-            if not is_in_manifest("TheCollective/%s" % dependency['repository']):
+            if not is_in_manifest("Collective-Phoenix/%s" % dependency['repository']):
                 fetch_list.append(dependency)
                 syncable_repos.append(dependency['target_path'])
 
@@ -177,6 +177,6 @@ else:
             print "Done"
             sys.exit()
 
-print "Repository for %s not found in TheCollective Github repository list. If this is in error, you may need to manually add it to your local_manifest.xml." % device
+print "Repository for %s not found in Collective-Phoenix Github repository list. If this is in error, you may need to manually add it to your local_manifest.xml." % device
 
 
